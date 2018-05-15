@@ -7,18 +7,27 @@ import Codec.Picture
   , Image(Image)
   , PixelRGB8(PixelRGB8)
   , convertRGB8
-  , pixelMap
   , readImage
   , saveJpgImage
   )
+import Codec.Picture.Types (pixelMapXY)
 import Control.Exception (Exception, throwIO)
 
+hatch :: Int -> Int -> PixelRGB8 -> PixelRGB8
+hatch x y px = px
+
+crunch :: PixelRGB8 -> PixelRGB8
+crunch (PixelRGB8 r g b) =
+  PixelRGB8 ((r `div` 50) * 50) ((g `div` 50) * 50) ((b `div` 50) * 50)
+
+greyscale :: PixelRGB8 -> PixelRGB8
+greyscale (PixelRGB8 r g b) = PixelRGB8 avg avg avg
+  where
+    avg =
+      fromIntegral ((fromIntegral r + fromIntegral g + fromIntegral b) `div` 3)
+
 convert :: Image PixelRGB8 -> Image PixelRGB8
-convert =
-  pixelMap
-    (\(PixelRGB8 r g b) ->
-       let avg = (r + g + b) `div` 3
-        in PixelRGB8 avg avg avg)
+convert = pixelMapXY (\x y -> hatch x y . crunch . greyscale)
 
 newtype Error =
   Error String

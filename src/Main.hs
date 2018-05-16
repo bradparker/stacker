@@ -42,12 +42,8 @@ hatch y (PixelRGB8 100 100 100)
 hatch y (PixelRGB8 150 150 150)
   | lineAt 1 15 y = PixelRGB8 0 0 0
   | otherwise = PixelRGB8 255 255 255
-hatch y (PixelRGB8 200 200 200)
-  | lineAt 1 25 y = PixelRGB8 0 0 0
-  | otherwise = PixelRGB8 255 255 255
-hatch y (PixelRGB8 250 250 250)
-  | lineAt 1 50 y = PixelRGB8 0 0 0
-  | otherwise = PixelRGB8 255 255 255
+hatch _ (PixelRGB8 200 200 200) = PixelRGB8 255 255 255
+hatch _ (PixelRGB8 250 250 250) = PixelRGB8 255 255 255
 hatch _ px = px
 
 crunch :: PixelRGB8 -> PixelRGB8

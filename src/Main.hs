@@ -14,6 +14,22 @@ import Codec.Picture.Types (pixelMapXY)
 import Control.Exception (Exception, throwIO)
 
 hatch :: Int -> Int -> PixelRGB8 -> PixelRGB8
+hatch x y (PixelRGB8 0 0 0) = PixelRGB8 0 0 0
+hatch x y (PixelRGB8 50 50 50)
+  | y `mod` 2 == 0 = PixelRGB8 0 0 0
+  | otherwise = PixelRGB8 255 255 255
+hatch x y (PixelRGB8 100 100 100)
+  | y `mod` 4 == 0 = PixelRGB8 0 0 0
+  | otherwise = PixelRGB8 255 255 255
+hatch x y (PixelRGB8 150 150 150)
+  | y `mod` 8 == 0 = PixelRGB8 0 0 0
+  | otherwise = PixelRGB8 255 255 255
+hatch x y (PixelRGB8 200 200 200)
+  | y `mod` 16 == 0 = PixelRGB8 0 0 0
+  | otherwise = PixelRGB8 255 255 255
+hatch x y (PixelRGB8 250 250 250)
+  | y `mod` 32 == 0 = PixelRGB8 0 0 0
+  | otherwise = PixelRGB8 255 255 255
 hatch x y px = px
 
 crunch :: PixelRGB8 -> PixelRGB8

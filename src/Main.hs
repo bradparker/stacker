@@ -32,15 +32,17 @@ lineAt :: Int -> Int -> Int -> Bool
 lineAt thickness gap y = any ((0 ==) . (`mod` gap)) (map (+ y) [0 .. thickness])
 
 hatch :: Int -> PixelRGB8 -> PixelRGB8
-hatch _ (PixelRGB8 0 0 0) = PixelRGB8 0 0 0
+hatch y (PixelRGB8 0 0 0)
+  | lineAt 3 6 y = PixelRGB8 0 0 0
+  | otherwise = PixelRGB8 255 255 255
 hatch y (PixelRGB8 50 50 50)
-  | lineAt 1 5 y = PixelRGB8 0 0 0
+  | lineAt 3 12 y = PixelRGB8 0 0 0
   | otherwise = PixelRGB8 255 255 255
 hatch y (PixelRGB8 100 100 100)
-  | lineAt 1 10 y = PixelRGB8 0 0 0
+  | lineAt 3 18 y = PixelRGB8 0 0 0
   | otherwise = PixelRGB8 255 255 255
 hatch y (PixelRGB8 150 150 150)
-  | lineAt 1 15 y = PixelRGB8 0 0 0
+  | lineAt 3 24 y = PixelRGB8 0 0 0
   | otherwise = PixelRGB8 255 255 255
 hatch _ (PixelRGB8 200 200 200) = PixelRGB8 255 255 255
 hatch _ (PixelRGB8 250 250 250) = PixelRGB8 255 255 255

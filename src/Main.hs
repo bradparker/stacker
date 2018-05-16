@@ -4,7 +4,7 @@ module Main
 
 import Codec.Picture
   ( DynamicImage(ImageRGB8)
-  , Image(Image)
+  , Image
   , PixelRGB8(PixelRGB8)
   , convertRGB8
   , readImage
@@ -12,25 +12,43 @@ import Codec.Picture
   )
 import Codec.Picture.Types (pixelMapXY)
 import Control.Exception (Exception, throwIO)
+import Data.Semigroup ((<>))
+import Options.Applicative
+  ( Parser
+  , customExecParser
+  , fullDesc
+  , header
+  , helper
+  , info
+  , long
+  , option
+  , prefs
+  , short
+  , showHelpOnError
+  , str
+  )
 
-hatch :: Int -> Int -> PixelRGB8 -> PixelRGB8
-hatch x y (PixelRGB8 0 0 0) = PixelRGB8 0 0 0
-hatch x y (PixelRGB8 50 50 50)
-  | y `mod` 2 == 0 = PixelRGB8 0 0 0
+lineAt :: Int -> Int -> Int -> Bool
+lineAt thickness gap y = any ((0 ==) . (`mod` gap)) (map (+ y) [0 .. thickness])
+
+hatch :: Int -> PixelRGB8 -> PixelRGB8
+hatch _ (PixelRGB8 0 0 0) = PixelRGB8 0 0 0
+hatch y (PixelRGB8 50 50 50)
+  | lineAt 1 5 y = PixelRGB8 0 0 0
   | otherwise = PixelRGB8 255 255 255
-hatch x y (PixelRGB8 100 100 100)
-  | y `mod` 4 == 0 = PixelRGB8 0 0 0
+hatch y (PixelRGB8 100 100 100)
+  | lineAt 1 10 y = PixelRGB8 0 0 0
   | otherwise = PixelRGB8 255 255 255
-hatch x y (PixelRGB8 150 150 150)
-  | y `mod` 8 == 0 = PixelRGB8 0 0 0
+hatch y (PixelRGB8 150 150 150)
+  | lineAt 1 15 y = PixelRGB8 0 0 0
   | otherwise = PixelRGB8 255 255 255
-hatch x y (PixelRGB8 200 200 200)
-  | y `mod` 16 == 0 = PixelRGB8 0 0 0
+hatch y (PixelRGB8 200 200 200)
+  | lineAt 1 25 y = PixelRGB8 0 0 0
   | otherwise = PixelRGB8 255 255 255
-hatch x y (PixelRGB8 250 250 250)
-  | y `mod` 32 == 0 = PixelRGB8 0 0 0
+hatch y (PixelRGB8 250 250 250)
+  | lineAt 1 50 y = PixelRGB8 0 0 0
   | otherwise = PixelRGB8 255 255 255
-hatch x y px = px
+hatch _ px = px
 
 crunch :: PixelRGB8 -> PixelRGB8
 crunch (PixelRGB8 r g b) =
@@ -40,10 +58,14 @@ greyscale :: PixelRGB8 -> PixelRGB8
 greyscale (PixelRGB8 r g b) = PixelRGB8 avg avg avg
   where
     avg =
-      fromIntegral ((fromIntegral r + fromIntegral g + fromIntegral b) `div` 3)
+      fromIntegral
+        (floor
+           (((fromIntegral r :: Float) * 0.21) +
+            ((fromIntegral g :: Float) * 0.72) +
+            ((fromIntegral b :: Float) * 0.07)) :: Int)
 
 convert :: Image PixelRGB8 -> Image PixelRGB8
-convert = pixelMapXY (\x y -> hatch x y . crunch . greyscale)
+convert = pixelMapXY (\_ y -> hatch y . crunch . greyscale)
 
 newtype Error =
   Error String
@@ -51,11 +73,32 @@ newtype Error =
 
 instance Exception Error
 
+data Options = Options
+  { input :: String
+  , output :: String
+  }
+
+optionsParser :: Parser Options
+optionsParser =
+  Options <$> option str (short 'i' <> long "input") <*>
+  option str (short 'o' <> long "output")
+
+getOptions :: IO Options
+getOptions =
+  customExecParser
+    (prefs showHelpOnError)
+    (info
+       (helper <*> optionsParser)
+       (header "Stacker - image thingy" <> fullDesc))
+
 main :: IO ()
 main = do
+  opts <- getOptions
+  image <- readImage (input opts)
   res <-
-    traverse (saveJpgImage 100 "foo.jpg" . ImageRGB8 . convert . convertRGB8) =<<
-    readImage "./test-media/chris.jpg"
+    traverse
+      (saveJpgImage 100 (output opts) . ImageRGB8 . convert . convertRGB8)
+      image
   case res of
-    Right _ -> putStrLn "Wrote: foo.jpg"
+    Right _ -> putStrLn ("Wrote: " <> output opts)
     Left e -> throwIO (Error e)

@@ -6,6 +6,7 @@ let
     then nixpkgs.haskellPackages
     else nixpkgs.pkgs.haskell.packages.${compiler};
 
+  cabal2nix = haskellPackages.cabal2nix;
   hlint = haskellPackages.hlint;
   cabal = haskellPackages.cabal-install;
   hindent = haskellPackages.hindent;
@@ -13,5 +14,5 @@ let
   env = (import ./default.nix { inherit nixpkgs compiler; }).env;
 in
   nixpkgs.lib.overrideDerivation env (drv: {
-    nativeBuildInputs = drv.nativeBuildInputs ++ [ hlint cabal hindent ];
+    nativeBuildInputs = drv.nativeBuildInputs ++ [ hlint cabal hindent cabal2nix ];
   })

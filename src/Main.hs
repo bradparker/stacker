@@ -39,9 +39,7 @@ hatch y (PixelRGB8 50 50 50)
 hatch y (PixelRGB8 100 100 100)
   | lineAt 0 8 y = PixelRGB8 0 0 0
   | otherwise = PixelRGB8 255 255 255
-hatch y (PixelRGB8 150 150 150)
-  | lineAt 0 16 y = PixelRGB8 0 0 0
-  | otherwise = PixelRGB8 255 255 255
+hatch _ (PixelRGB8 150 150 150) = PixelRGB8 255 255 255
 hatch _ (PixelRGB8 200 200 200) = PixelRGB8 255 255 255
 hatch _ (PixelRGB8 250 250 250) = PixelRGB8 255 255 255
 hatch _ px = px
